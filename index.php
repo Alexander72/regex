@@ -20,7 +20,7 @@
 	{
 		global $trivials;
 
-		if(strlen($str) == 1 && stristr($trivials, $str) !== false)
+		if($str === NULL || (strlen($str) == 1 && stristr($trivials, $str) !== false))
 			return true;
 		else
 			return false;
@@ -158,6 +158,7 @@
 	while(!$all_trivial)
 	{
 		$all_trivial = true;
+
 		//split into cases:		
 		foreach($table as $key => $route)
 		{
@@ -211,10 +212,43 @@
 			}
 		}
 
+		//open repeat
+		foreach($table as $key => $route)
+		{
+			if($route['is_finish'])
+				continue;
+
+			if(is_trivial_terminal($route['terminal']))
+				continue;
+
+			$terminal = $route['terminal'];
+			$len = strlen($terminal);
+			$last_sumbol = $terminal[$len - 1];
+			$simply_terminal = substr($terminal, 0, $len-1);
+
+			if($last_sumbol === '*')
+			{
+				$dest = get_last_index($table) + 1;
+				$table[] = ['src' => $route['src'], 'terminal' => NULL, 'dest' => $dest, 'is_finish' => 0];
+				$table[] = ['src' => $dest, 'terminal' => $simply_terminal, 'dest' => $dest, 'is_finish' => 0];
+				$table[] = ['src' => $dest, 'terminal' => NULL, 'dest' => $route['dest'], 'is_finish' => 0];
+				unset($table[$key]);
+				$all_trivial &= is_trivial_terminal($terminal);
+			}
+			elseif($last_sumbol === '+')
+			{
+				$dest = get_last_index($table) + 1;
+				$table[] = ['src' => $route['src'], 'terminal' => NULL, 'dest' => $dest, 'is_finish' => 0];
+				$table[] = ['src' => $dest, 'terminal' => $simply_terminal, 'dest' => $dest, 'is_finish' => 0];
+				$table[] = ['src' => $dest, 'terminal' => $simply_terminal, 'dest' => $route['dest'], 'is_finish' => 0];
+				unset($table[$key]);
+				$all_trivial &= is_trivial_terminal($terminal);
+			}		
+		}
+
 		//open groups
 		foreach($table as $key => $route)
 		{
-
 			if($route['is_finish'])
 				continue;
 
@@ -227,9 +261,10 @@
 				$table[$key]['terminal'] = substr($table[$key]['terminal'], 1, $len-2);
 			}			
 		}
-		
+
 		//заглушка:
-		$all_trivial = true;
+		//$all_trivial = true;
+		if($counter++ > 3)die('aaaaaaaaaaaaaaaa');
 	}
 	p($table, 1);
 
