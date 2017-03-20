@@ -96,6 +96,7 @@
 					$str = substr($str, $i + 1);				
 			}	
 		}
+
 		return $result;
 	}
 
@@ -152,11 +153,12 @@
 	];
 
 	$all_trivial = is_trivial_terminal($str);
+	$counter = 0;
 
 	while(!$all_trivial)
 	{
 		$all_trivial = true;
-		//split into cases:
+		//split into cases:		
 		foreach($table as $key => $route)
 		{
 			if($route['is_finish'])
@@ -179,7 +181,6 @@
 		//build chains
 		foreach($table as $key => $route)
 		{
-
 			if($route['is_finish'])
 				continue;
 
@@ -196,12 +197,12 @@
 					$i++;
 					if($i == $items_cnt)
 					{					
-						$table[] = ['src' => $last_dest, 'terminal' => $item, 'dest' => $table[$key]['dest'], 'is_final' => 0];	
+						$table[] = ['src' => $last_dest, 'terminal' => $item, 'dest' => $table[$key]['dest'], 'is_finish' => 0];	
 					}
 					else
 					{
 						$dest = get_last_index($table) + 1;
-						$table[] = ['src' => $last_dest, 'terminal' => $item, 'dest' => $dest, 'is_final' => 0];
+						$table[] = ['src' => $last_dest, 'terminal' => $item, 'dest' => $dest, 'is_finish' => 0];
 						$last_dest = $dest;
 					}
 				}
@@ -210,6 +211,23 @@
 			}
 		}
 
+		//open groups
+		foreach($table as $key => $route)
+		{
+
+			if($route['is_finish'])
+				continue;
+
+			if(is_trivial_terminal($route['terminal']))
+				continue;
+
+			$len = strlen($route['terminal']);
+			if($route['terminal'][0] == '(' && $route['terminal'][$len-1] == ')')
+			{
+				$table[$key]['terminal'] = substr($table[$key]['terminal'], 1, $len-2);
+			}			
+		}
+		
 		//заглушка:
 		$all_trivial = true;
 	}
