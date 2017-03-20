@@ -7,7 +7,7 @@
 		echo "<pre>";
 		if($die) die();
 	}
-	$trivials = ['0', '1'];
+	$trivials = '0123456789abcdefghijklmnopqrstuvwxyz ';
 	$str = '';
 
 	function p($var, $die = false)
@@ -19,7 +19,17 @@
 	function is_trivial_terminal($str)
 	{
 		global $trivials;
-		return in_array($str, $trivials);
+
+		if(strlen($str) == 1 && stristr($trivials, $str) !== false)
+			return true;
+		else
+			return false;
+	}
+
+	function get_last_index($table)
+	{
+		end($table);
+		return key($table);
 	}
 
 	function get_close_bracket_index($str, $start_pos)
@@ -50,10 +60,10 @@
 
 	}
 
-	function split_by_alternatives($str)
+	function split_by_or($str)
 	{
 		$result = [];
-		while($str)
+		while($str !== '')
 		{
 			$len = strlen($str);
 			$i = 0;
@@ -89,16 +99,56 @@
 		return $result;
 	}
 
+	function split_by_and($str)
+	{
+		$stop = $str == '123';
+		$result = [];
+		while($str !== '')
+		{
+			$i = 0;	
+			$len = strlen($str);		
+			if(!in_array($str[$i], ['*', '+']))
+			{	
+				if($str[$i] == '(')
+				{
+					$i = get_close_bracket_index($str, $i);
+				}
+
+				if($i + 1 == $len || (in_array($str[$i+1], ['*', '+']) && $i + 2 == $len))
+				{
+					$result[] = $str;
+					break;
+				}
+				else
+				{	
+					if(in_array($str[$i+1], ['*', '+']))
+					{
+						$i++;
+					}
+
+					$result[] = substr($str, 0, $i + 1);
+					$str = substr($str, $i + 1);	
+				}
+			}
+			else
+			{
+				die('unexpected '.$str[$i]);
+			}	
+		}
+		return $result;
+	}
+
 	if(!isset($_POST['str']))
 	{
 		include "template.php";
 		die();
 	}
 	$str = $_POST['str'];
+	p($str);
 
 	$table = [
 		['src' => 0, 'terminal' => $str, 'dest' => 1, 'is_finish' => 0],
-		['is_finish' => 1],
+		['src' => 1, 'is_finish' => 1],
 	];
 
 	$all_trivial = is_trivial_terminal($str);
@@ -115,7 +165,7 @@
 			if(is_trivial_terminal($route['terminal']))
 				continue;
 
-			if($alternatives = split_by_alternatives($route['terminal']))
+			if($alternatives = split_by_or($route['terminal']))
 			{
 				foreach($alternatives as $terminal)
 				{
@@ -125,11 +175,45 @@
 				$all_trivial &= is_trivial_terminal($terminal);
 			}
 		}
+
+		//build chains
+		foreach($table as $key => $route)
+		{
+
+			if($route['is_finish'])
+				continue;
+
+			if(is_trivial_terminal($route['terminal']))
+				continue;
+
+			if($items = split_by_and($route['terminal']))
+			{
+				$last_dest = $table[$key]['src'];
+				$items_cnt = count($items);
+				$i = 0;
+				foreach($items as $item)
+				{
+					$i++;
+					if($i == $items_cnt)
+					{					
+						$table[] = ['src' => $last_dest, 'terminal' => $item, 'dest' => $table[$key]['dest'], 'is_final' => 0];	
+					}
+					else
+					{
+						$dest = get_last_index($table) + 1;
+						$table[] = ['src' => $last_dest, 'terminal' => $item, 'dest' => $dest, 'is_final' => 0];
+						$last_dest = $dest;
+					}
+				}
+				unset($table[$key]);
+				$all_trivial &= is_trivial_terminal($terminal);
+			}
+		}
+
 		//заглушка:
 		$all_trivial = true;
 	}
-	v($_POST['str']);
-	v(array_column($table, 'terminal'), 1);
+	p($table, 1);
 
 	
 

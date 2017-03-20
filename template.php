@@ -10,7 +10,7 @@
 		<section class="container">
 			<br>
 			<form method="POST" class="form-horizontal">
-				<p> Example: 312312|dsfwerf(fdwfw(gfdgerg) (fgweg) | ferter (wfwe) ) | 123| A</p>
+				<p> Example: 12|a*b|dc*|(zzzzz)*QQQ|0</p>
 			  	<div class="form-group <?=$status?> has-feedback">
 			    	<label class="col-sm-2 control-label" for="input_text">Input string: </label>
 			    	<div class="col-sm-10">
