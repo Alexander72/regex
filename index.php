@@ -141,7 +141,7 @@
 
 	if(!isset($_POST['str']))
 	{
-		include "template.php";
+		include "templates/index.php";
 		die();
 	}
 	$str = $_POST['str'];
@@ -270,7 +270,7 @@
 
 	
 
-	include "template.php";
+	include "templates/index.php";
 
 
 
