@@ -102,6 +102,68 @@ class Graph
 		}
 	}
 
+	function has_e_route()
+	{
+		foreach($this->routes as $route)
+		{
+			if($route->terminal->is_e_terminal())
+				return true;
+		}
+		return false;
+	}
+
+	function remove_e_route($state)
+	{		
+		static $e_routes = [];
+		if(!$state->has_outcome_e_route())
+		{
+			if($e_routes)
+			{
+				//дошли до конца е-дуг
+				//удаляем е-дугу по алгоритму
+				return true;
+			}
+			else
+			{
+				//не было найдено ни одной е-дуги
+				$e_routes = [];
+				return false;
+			}
+		}
+		else
+		{
+			foreach($state->outcoming_routes as $route)
+			{
+				if(in_array($route->dest->id, array_keys($e_routes)))
+				{
+					//удаляем цикл
+				}
+				else
+				{
+					//идем по е-дугам дальше
+					$e_routes[] = $route;
+					return $this->remove_e_route($route->dest);
+				}
+			}
+		}
+	}
+
+	function remove_e_routes()
+	{
+		while($this->has_e_route())
+		{
+			$start = $this->states[0];
+			if($this->remove_e_route($start))
+				continue;
+
+			foreach($this->states as $state)
+			{
+				if($this->remove_e_route($state))
+					continue;
+			}
+		}
+	}
+
 	function __toString()
 	{
 		$res = [];

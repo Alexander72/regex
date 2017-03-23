@@ -42,6 +42,11 @@ class Route
 
 	}
 
+	function is_e_terminal()
+	{
+		return $this->terminal->is_e_terminal();
+	}
+
 	function delete()
 	{
 		unset($this->terminal);

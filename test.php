@@ -32,6 +32,7 @@
 	$graph = new Graph;
 	$graph->add_route($route);
 	$graph->simplify();
+	$graph->remove_e_routes();
 	
 
 	include "templates/graph.php";

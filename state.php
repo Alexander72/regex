@@ -2,11 +2,11 @@
 class State
 {
 	public $id;
+	public $incoming_routes;
+	public $outcoming_routes;
 
 	private $start;
 	private $finish;
-	private $incoming_routes;
-	private $outcoming_routes;
 	private $deleted;
 
 	private static $auto_increment = 0;
@@ -66,6 +66,16 @@ class State
 	{
 		$this->deleted = true;
 		unset(self::$list[$this->id]);
+	}
+
+	function has_outcome_e_route()
+	{
+		foreach($this->outcoming_routes as $route)
+		{
+			if($route->is_e_terminal())
+				return true;
+		}
+		return false;
 	}
 
 	function add_outcome_route($route)
