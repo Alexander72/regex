@@ -10,7 +10,7 @@
 		<section class="container">
 			<br>
 			<form method="POST" class="form-horizontal">
-				<p> Example: 41|3(1|0)*</p>
+				<p> Example: (12|(33)+|a)*a|123*12(3)+|Q(RH|(09|4)+Z)*W+R+R</p>
 			  	<div class="form-group <?=$status?> has-feedback">
 			    	<label class="col-sm-2 control-label" for="input_text">Input string: </label>
 			    	<div class="col-sm-10">

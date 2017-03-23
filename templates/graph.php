@@ -7,21 +7,15 @@
 		<!--
 
 		var redraw;
-		var height = 800;
-		var width = 1200;
+		var height = 600;
+		var width = 800;
 
 		/* only do all this when document has finished loading (needed for RaphaelJS) */
 		window.onload = function() {
 
 		    var g = new Graph();
 
-		    /* add a simple node */
-		    g.addNode("strawberry");
-		    g.addNode("cherry");
-
-		    /* add a node with a customized label */
-		    g.addNode("id34", { label : "Tomato" });
-
+		    //g.addNode("QQQQ", {label : "QQQ" , fill : '#f00', render : render});
 		    /* add a node with a customized shape 
 		       (the Raphael graph drawing implementation can draw this shape, please 
 		       consult the RaphaelJS reference for details http://raphaeljs.com/) */
@@ -36,47 +30,10 @@
 		//            set.tooltip(r.set().push(r.rect(0, 0, 30, 30).attr({"fill": "#fec", "stroke-width": 1, r : "9px"})).hide());
 		            return set;
 		        };
-		    g.addNode("id35", {
-		        label : "27" ,
-		        /* filling the shape with a color makes it easier to be dragged */
-		        /* arguments: r = Raphael object, n : node object */
-		        render : render
-		    });
-		    //g.addNode("Wheat", {
-		    //    /* filling the shape with a color makes it easier to be dragged */
-		    //    /* arguments: r = Raphael object, n : node object */
-		    //    shapes : [ {
-		    //            type: "rect",
-		    //            x: 10,
-		    //            y: 10,
-		    //            width: 25,
-		    //            height: 25,
-		    //            stroke: "#f00"
-		    //        }, {
-		    //            type: "text",
-		    //            x: 30,
-		    //            y: 40,
-		    //            text: "Dump"
-		    //        }],
-		    //    overlay : "<b>Hello <a href=\"http://wikipedia.org/\">World!</a></b>"
-		    //});
-
-		    /* connect nodes with edges */
-		    g.addEdge("id34", "cherry");
-		    g.addEdge("cherry", "apple");
-
-		    /* a directed connection, using an arrow */
-		    g.addEdge("id34", "strawberry", { directed : true } );
-		    
-		    /* customize the colors of that edge */
-		    g.addEdge("id35", "apple", { stroke : "#bfa" , fill : "#56f", label : "Label", directed : true });
-		    
-		    /* add an unknown node implicitly by adding an edge */
-		    g.addEdge("strawberry", "apple");
-
-		    g.addEdge("id34", "id35");
-		    g.addEdge("id35", "strawberry");
-		    g.addEdge("id35", "cherry");
+		    <?=$graph->print_in_raphaeljs()?>
+			g.edges.forEach((e) => {
+			  console.log(e);
+			});
 
 		    /* layout the graph using the Spring layout implementation */
 		    var layouter = new Graph.Layout.Spring(g);
@@ -97,5 +54,9 @@
     </script>
 </header>
 <body>
+<h3>String: <?=$str?></h3>
+<div style="float: left;">
+	<?=$graph?>
+</div>
 <div id="canvas"></div>
 </body>

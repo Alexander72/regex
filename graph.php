@@ -73,9 +73,10 @@ class Graph
 				$terminal = $route->terminal;
 				$len = strlen($terminal->str);
 				$last_sumbol = $terminal->str[$len - 1];
-				$simple_terminal = new Terminal(substr($terminal->str, 0, $len-1));
+				$tmp = substr($terminal->str, 0, $len - 1);
+				$simple_terminal = new Terminal($tmp);
 
-				if(!$last_sumbol === '*' && !$last_sumbol === '+')
+				if($last_sumbol !== '*' && $last_sumbol !== '+')
 					continue;
 
 				$cycle_terminal = $last_sumbol === '*' ? false : $simple_terminal;
@@ -98,23 +99,45 @@ class Graph
 				$route->terminal->trim_bracket();		
 			}
 
-		echo $this;
 		}
 	}
 
 	function __toString()
 	{
-		$res = "<h3>States:</h3>";
+		$res = [];
 		foreach($this->states as $state)
 		{
-			$res .= "<p>".$state->id."</p>";
+			$res[] = $state->id;
 		}
 
+		$res = "<h3>States:</h3><p>".implode(", ", $res)."</p>";
 		$res .= "<h3>Routes:</h3>";
 		foreach($this->routes as $route)
 		{
-			$res .= "<p>".$route->src->id." ----\"".$route->terminal->str."\"----> ".$route->dest->id."</p>";
+			$res .= "<p>".$route->src->id." ----\"".$route->terminal->content()."\"----> ".$route->dest->id."</p>";
 		}
+		return $res;
+	}
+
+	function print_in_raphaeljs()
+	{
+		$res = "";
+		foreach($this->states as $state)
+		{
+			$fill = "render : render";
+			if($state->is_start())
+				$fill = " fill : '#ffd343' ";
+			if($state->is_finish())
+				$fill = " fill : '#ff6b43' ";
+			$res .= 'g.addNode("'.$state->id.'", {label : "'.$state->id.'", '.$fill.'});';
+		}
+
+		foreach($this->routes as $route)
+		{
+			$terminal = $route->terminal->is_e_terminal() ? 'ε' : $route->terminal->str;
+		    $res .= 'g.addEdge("'.$route->src->id.'", "'.$route->dest->id.'", { stroke : "#bfa" , fill : "#56f", label : "'.$terminal.'", directed : true });';
+		}
+
 		return $res;
 	}
 
@@ -132,7 +155,7 @@ class Graph
 
 	function delete_route($route)
 	{
-		if(!in_array($route->id, array_keys($this->routes)))
+		if(in_array($route->id, array_keys($this->routes)))
 		{
 			unset($this->routes[$route->id]);
 			$route->delete();

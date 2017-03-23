@@ -18,11 +18,11 @@
 
 	if(!isset($_POST['str']))
 	{
-		include "template.php";
+		include "templates/index.php";
 		die();
 	}
 	$str = $_POST['str'];
-	p($str);
+	//p($str);
 
 	$start  = new State(['start'  => true]);
 	$finish = new State(['finish' => true]);
@@ -33,4 +33,5 @@
 	$graph->add_route($route);
 	$graph->simplify();
 	
-	echo $graph;
+
+	include "templates/graph.php";

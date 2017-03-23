@@ -25,6 +25,11 @@ class Terminal
 		return $this->str === false;
 	}
 
+	function content()
+	{
+		return $this->str === false ? 'ε' : $this->str;
+	}
+
 	function trim_bracket()
 	{		
 		if($str = $this->str)
