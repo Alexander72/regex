@@ -84,9 +84,9 @@ class Graph
 
 				$dest = new State;
 				$routes = [];
-				$routes[] = new Route(['src' => $route->src, 'terminal' => false, 'dest' => $dest]);
+				$routes[] = new Route(['src' => $route->src, 'terminal' => $cycle_terminal, 'dest' => $dest]);
 				$routes[] = new Route(['src' => $dest, 'terminal' => $simple_terminal, 'dest' => $dest]);
-				$routes[] = new Route(['src' => $dest, 'terminal' => $cycle_terminal, 'dest' => $route->dest]);
+				$routes[] = new Route(['src' => $dest, 'terminal' => false, 'dest' => $route->dest]);
 				$this->replace_route($route, $routes);
 				$all_trivial &= $simple_terminal->is_trivial();	
 			}
@@ -194,7 +194,8 @@ class Graph
 		{
 			//p($i);
 			if($i++ > 20) die();
-			$this->remove_dummy_e_routes();
+			$this->remove_dummy_routes();
+			$this->remove_dummy_states();
 
 			$start = $this->states[0];
 			if($this->remove_e_route($start))
@@ -208,12 +209,21 @@ class Graph
 		}
 	}
 
-	function remove_dummy_e_routes()
+	function remove_dummy_routes()
 	{
 		foreach($this->routes as $route)
 		{
 			if($route->src->id == $route->dest->id && $route->is_e_terminal())
 				$this->delete_route($route);
+		}
+	}
+
+	function remove_dummy_states()
+	{
+		foreach($this->states as $state)
+		{
+			if(!$state->is_start() && !$state->has_income_route())
+				$this->delete_state($state);
 		}
 	}
 
@@ -242,12 +252,18 @@ class Graph
 		$res = "";
 		foreach($this->states as $state)
 		{
-			$fill = "render : render";
+			$render = "render : ";
+			$type = "render";
+			if($state->has_self_route())
+				$type .= "Self";
 			if($state->is_start())
-				$fill = " fill : '#ffd343' ";
+				$type .= "Start";
 			if($state->is_finish())
-				$fill = " fill : '#ff6b43' ";
-			$res .= 'g.addNode("'.$state->id.'", {label : "'.$state->id.'", '.$fill.'});';
+				$type .= "Finish";
+			$render .= $type;
+			$route = $state->has_self_route();
+			$self = $route ? "(".$route->terminal->str.")" : '';
+			$res .= 'g.addNode("'.$state->id.'", {label : "'.$state->id.$self.'", '.$render.'});';
 		}
 
 		foreach($this->routes as $route)
@@ -331,6 +347,18 @@ class Graph
 			$destination->add_outcome_route($new_route);
 			$this->add_route($new_route);
 		}
+	}
+
+	function delete_state($state)
+	{
+		foreach($state->outcoming_routes as $route)
+			$this->delete_route($route);
+
+		foreach($state->incoming_routes as $route)
+			$this->delete_route($route);
+
+		unset($this->states[$state->id]);
+		$state->delete();
 	}
 }
 

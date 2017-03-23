@@ -88,6 +88,21 @@ class State
 		return false;
 	}
 
+	function has_income_route()
+	{
+		return $this->incoming_routes;
+	}
+
+	function has_self_route()
+	{
+		foreach($this->outcoming_routes as $route)
+		{
+			if($route->dest->id == $this->id)
+				return $route;
+		}
+		return false;
+	}
+
 	function add_outcome_route($route)
 	{
 		$this->outcoming_routes[$route->id] = $route;
