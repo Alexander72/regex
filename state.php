@@ -68,6 +68,16 @@ class State
 		unset(self::$list[$this->id]);
 	}
 
+	function find_income_e_route($prev_state)
+	{
+		foreach($this->incoming_routes as $route)
+		{
+			if($route->src->id == $prev_state->id && $route->is_e_terminal())
+				return $route;
+		}
+		return false;
+	}
+
 	function has_outcome_e_route()
 	{
 		foreach($this->outcoming_routes as $route)

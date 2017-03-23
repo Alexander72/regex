@@ -5,6 +5,7 @@ class Graph
 {
 	private $states = [];
 	private $routes = [];
+	private static $debug = 0;
 
 	function simplify()
 	{
@@ -112,21 +113,45 @@ class Graph
 		return false;
 	}
 
-	function remove_e_route($state)
-	{		
-		static $e_routes = [];
+	function remove_e_route($state, $debug = 0)
+	{	
+		self::$debug++;
+		//p("ITERATION: ".self::$debug."; STATE: ".$state->id);
+		//p($this->__toString());
+		static $e_states = [];
+		if($debug > 7) die('too deep recursion(8). stop in state ID:'.$state->id);
 		if(!$state->has_outcome_e_route())
 		{
-			if($e_routes)
+			if($e_states)
 			{
 				//дошли до конца е-дуг
-				//удаляем е-дугу по алгоритму
+				//удаляем е-дугу по алгоритму:
+				$first_state = reset($e_states);
+				$last_state = end($e_states);
+
+				if($first_state->is_start())
+					$state->set_start();
+
+				if($state->is_finish())
+					$last_state->set_finish();
+
+				if($route = $state->find_income_e_route($last_state))
+					$this->delete_route($route);
+
+				$this->merge_outcome_routes($last_state, $state);
+
+				//p($state->id.': end e-route');
+				//p("RESULT:");
+				//p($this->__toString());
+
+				$e_states = [];
 				return true;
 			}
 			else
 			{
+				//p($state->id.': no e-route');
 				//не было найдено ни одной е-дуги
-				$e_routes = [];
+				$e_states = [];
 				return false;
 			}
 		}
@@ -134,15 +159,29 @@ class Graph
 		{
 			foreach($state->outcoming_routes as $route)
 			{
-				if(in_array($route->dest->id, array_keys($e_routes)))
+				if(!$route->is_e_terminal())
+					continue;
+
+				if(in_array($route->dest->id, array_keys($e_states)))
 				{
 					//удаляем цикл
+					$should_merge = false;
+					foreach($e_states as $visited_state)
+					{
+						$should_merge = $visited_state->id == $state->id;
+						if($visited_state->id != $state->id && $should_merge)
+						{
+							$this->merge($state, $visited_state);
+						}
+					}
+					$e_states = [];
+					return true;
 				}
 				else
 				{
 					//идем по е-дугам дальше
-					$e_routes[] = $route;
-					return $this->remove_e_route($route->dest);
+					$e_states[$state->id] = $state;
+					return $this->remove_e_route($route->dest, $debug + 1);
 				}
 			}
 		}
@@ -150,8 +189,13 @@ class Graph
 
 	function remove_e_routes()
 	{
+		$i = 0;
 		while($this->has_e_route())
 		{
+			//p($i);
+			if($i++ > 20) die();
+			$this->remove_dummy_e_routes();
+
 			$start = $this->states[0];
 			if($this->remove_e_route($start))
 				continue;
@@ -164,19 +208,31 @@ class Graph
 		}
 	}
 
+	function remove_dummy_e_routes()
+	{
+		foreach($this->routes as $route)
+		{
+			if($route->src->id == $route->dest->id && $route->is_e_terminal())
+				$this->delete_route($route);
+		}
+	}
+
 	function __toString()
 	{
-		$res = [];
+		/*$res = [];
 		foreach($this->states as $state)
 		{
 			$res[] = $state->id;
 		}
 
-		$res = "<h3>States:</h3><p>".implode(", ", $res)."</p>";
+		$res = "<h3>States:</h3><p>".implode(", ", $res)."</p>";*/
+		$res = '';
 		$res .= "<h3>Routes:</h3>";
 		foreach($this->routes as $route)
-		{
-			$res .= "<p>".$route->src->id." ----\"".$route->terminal->content()."\"----> ".$route->dest->id."</p>";
+		{	
+			$src = $route->src->id.($route->src->is_start() ? '(S)' : '').($route->src->is_finish() ? '(Z)' : '');
+			$dest = $route->dest->id.($route->dest->is_start() ? '(S)' : '').($route->dest->is_finish() ? '(Z)' : '');
+			$res .= "<p>".$src." ----\"".$route->terminal->content()."\"----> ".$dest."</p>";
 		}
 		return $res;
 	}
@@ -245,5 +301,36 @@ class Graph
 		{
 			$this->delete_route($route);
 		}
+	}	
+
+	function merge($state, $merged_state)
+	{
+		if($state->id != $merged_state->id)
+		{
+			$outcoming_routes = $merged_state->outcoming_routes;
+			foreach($outcoming_routes as $route)
+			{
+				$state->add_outcome_route($route);
+				$merged_state->delete_outcome_route($route);
+			}
+
+			$incoming_routes = $merget_state->incoming_routes;
+			foreach($incoming_routes as $route)
+			{
+				$state->add_income_route($route);
+				$merget_state->delete_income_route($route);
+			}
+		}
+	}	
+
+	function merge_outcome_routes($destination, $source)
+	{
+		foreach($source->outcoming_routes as $route)
+		{
+			$new_route = new Route(['src' => $destination, 'terminal' => $route->terminal, 'dest' => $route->dest]);
+			$destination->add_outcome_route($new_route);
+			$this->add_route($new_route);
+		}
 	}
 }
+
