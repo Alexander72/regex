@@ -3,8 +3,8 @@ require_once "route.php";
 
 class Graph
 {
-	private $states = [];
-	private $routes = [];
+	public $states = [];
+	public $routes = [];
 	private static $debug = 0;
 
 	function simplify()
@@ -364,6 +364,17 @@ class Graph
 
 		unset($this->states[$state->id]);
 		$state->delete();
+	}
+
+	function get_all_str_terminals()
+	{
+		$res = [];
+		foreach($this->routes as $route)
+		{
+			if(!in_array($route->terminal->str, $res))
+				$res[] = $route->terminal->str;
+		}
+		return $res;
 	}
 }
 

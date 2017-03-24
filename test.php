@@ -1,6 +1,8 @@
 <?
 	error_reporting(E_ALL);
 	require_once "graph.php";
+	require_once "nfa.php";
+	require_once "dfa.php";
 	function v($var, $die = false)
 	{
 		echo "<pre>";
@@ -33,12 +35,19 @@
 	if(isset($_POST['build']))
 	{
 		$graph->simplify();
+		include "templates/graph.php";
 	}
 	elseif(isset($_POST['simplify']))
 	{
 		$graph->simplify();
+		$graph->remove_e_routes();	
+		include "templates/graph.php";	
+	}
+	elseif(isset($_POST['nfa']))
+	{
+		$graph->simplify();
 		$graph->remove_e_routes();		
+		$table = build_nfa($graph);	
+		include "templates/table.php";	
 	}
 	
-
-	include "templates/graph.php";
