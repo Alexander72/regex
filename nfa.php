@@ -14,9 +14,6 @@ function build_nfa($graph)
 		//заполняем пустыми значениями строку
 		for($i = 0; $i < $terminals_count; $i++) 
 			$data[] = '';
-		/*if($j++ == 1) {
-			p($terminals_count);p($data, 1);
-		}*/
 
 		$terminals = [];
 		foreach($state->outcoming_routes as $route)

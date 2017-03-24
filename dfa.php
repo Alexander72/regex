@@ -1,29 +1,35 @@
 <?
-function build_dfa($graph)
+function data($data)
 {
-	$headers = array_merge(['State'], $graph->get_all_str_terminals(), ['Is final']);
-	$width = count($headers);
-	$rows = [];
-	foreach ($graph->states as $state) 
+	$res = [];
+	if(isset($data[0]))
 	{
-		$row = [$state->id];
-
-		//заполняем пустыми значениями строку
-		for($i = 1; $i < $width; $i++) 
-			$row[] = "";
-
-		foreach($state->outcoming_routes as $route)
-		{
-			$terminal = $route->terminal->str;
-			$index = array_search($terminal, $headers);
-			$class = $route->src->is_start() ? 'class="start_row"' : '';
-			$row[$index + 1] = "<td ".$class.">".$route->dest->id."</td>\n";
-		}
-		p($row, 1);
-		$row[$width - 1] = $route->dest->is_finish() ? '1' : '';
-
-		$rows[] = $row;
+		$len = count($data[0]);
+		for($i = 0; $i < $len; $i++)
+			$res[$i] = implode(',', array_column($data, $i));
 	}
+	return $res;
+}
+
+function build_dfa($graph, $table)
+{
+	$all_terminals = $graph->get_all_str_terminals();
+	$terminals_count = count($all_terminals);
+	$rows = [];
+
+	//ищем все начальные состояния
+	$first_states = [];
+	$data = [];
+	foreach($table['rows'] as $row)
+	{
+		if($row['state']->is_start())
+		{
+			$first_states[] = $row['state']->id;
+			$data[] = $row['data'];
+		}
+	}
+	$row = ['state' => implode(',', $first_states), 'data' => merge_data($data), 'is_first' => true, 'is_last' => false];
+	$rows[] = $row;
 	return ['headers' => $headers, 'rows' => $rows];
 
 }
