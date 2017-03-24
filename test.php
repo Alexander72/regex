@@ -50,4 +50,12 @@
 		$table = build_nfa($graph);	
 		include "templates/table.php";	
 	}
+	elseif(isset($_POST['nfa']))
+	{
+		$graph->simplify();
+		$graph->remove_e_routes();		
+		$table = build_nfa($graph);	
+		$table = build_dfa($graph);	
+		include "templates/table.php";	
+	}
 	

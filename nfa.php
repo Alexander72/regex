@@ -1,24 +1,36 @@
 <?
+
 function build_nfa($graph)
 {
-	$headers = array_merge(['State'], $graph->get_all_str_terminals(), ['Is final']);
-	$width = count($headers);
+	$all_terminals = $graph->get_all_str_terminals();
+	$headers = array_merge(['State'], $all_terminals, ['Is final']);
+	$terminals_count = count($all_terminals);
 	$rows = [];
+	$j = 0;
 	foreach ($graph->states as $state) 
 	{
-		$row = [$state->id];
+		$data = [];
 
 		//заполняем пустыми значениями строку
-		for($i = 1; $i < $width; $i++) 
-			$row[] = "";
+		for($i = 0; $i < $terminals_count; $i++) 
+			$data[] = '';
+		/*if($j++ == 1) {
+			p($terminals_count);p($data, 1);
+		}*/
 
+		$terminals = [];
 		foreach($state->outcoming_routes as $route)
 		{
-			$terminal = $route->terminal->str;
-			$index = array_search($terminal, $headers);
-			$row[$index + 1] = $route->dest->id;
+			$terminals[$route->terminal->str][] = $route->dest->id;
 		}
-		$row[$width - 1] = $route->dest->is_finish() ? '1' : '';
+
+		foreach($terminals as $str => $value)
+		{
+			$index = array_search($str, $all_terminals);
+			$data[$index] = implode(',', $value);
+		}
+		$row['data'] = $data;
+		$row['state'] = $state;
 
 		$rows[] = $row;
 	}
