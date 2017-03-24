@@ -1,5 +1,6 @@
 
 <header>
+	<link rel="stylesheet" href="css/bootstrap.min.css" crossorigin="anonymous">
     <script type="text/javascript" src="js/raphael-min.js"></script>
     <script type="text/javascript" src="js/graffle.js"></script>
     <script type="text/javascript" src="js/graph.js"></script>
@@ -118,9 +119,12 @@
     </script>
 </header>
 <body>
-<h3>String: <?=$str?></h3>
-<div style="float: left;">
-	<?=$graph?>
-</div>
-<div id="canvas"></div>
+	<section class="container">
+		<h3>String: <?=$str?></h3>
+		<a href="" class="btn btn-primary">Back</a>
+	</section>
+	<div style="float: left;">
+		<?=$graph?>
+	</div>
+	<div id="canvas"></div>
 </body>

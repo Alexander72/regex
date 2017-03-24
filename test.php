@@ -22,7 +22,6 @@
 		die();
 	}
 	$str = $_POST['str'];
-	//p($str);
 
 	$start  = new State(['start'  => true]);
 	$finish = new State(['finish' => true]);
@@ -31,8 +30,15 @@
 
 	$graph = new Graph;
 	$graph->add_route($route);
-	$graph->simplify();
-	$graph->remove_e_routes();
+	if(isset($_POST['build']))
+	{
+		$graph->simplify();
+	}
+	elseif(isset($_POST['simplify']))
+	{
+		$graph->simplify();
+		$graph->remove_e_routes();		
+	}
 	
 
 	include "templates/graph.php";

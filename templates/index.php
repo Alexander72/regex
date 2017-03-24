@@ -20,7 +20,10 @@
 			      		<?/*/?>
 			    	</div>
 			  	</div>
-				<button type="submit" name="submit" class="btn btn-primary">Check</button>
+				<button type="submit" name="build" class="btn btn-primary">Build graph</button>
+				<button type="submit" name="simplify" class="btn btn-primary">Remove e-routes</button>
+				<button type="submit" name="nfa" class="btn btn-primary">Build NFA</button>
+				<button type="submit" name="dfa" class="btn btn-primary">Build DFA</button>
 
 			</form>
 		</section>
