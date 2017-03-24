@@ -73,8 +73,15 @@ class Graph
 
 				$terminal = $route->terminal;
 				$len = strlen($terminal->str);
-				$last_sumbol = $terminal->str[$len - 1];
-				$tmp = substr($terminal->str, 0, $len - 1);
+				if($len)
+				{
+					$last_sumbol = $terminal->str[$len - 1];
+					$tmp = substr($terminal->str, 0, $len - 1);
+				}
+				else
+				{
+					$tmp = "";
+				}
 				$simple_terminal = new Terminal($tmp);
 
 				if($last_sumbol !== '*' && $last_sumbol !== '+')
@@ -116,8 +123,6 @@ class Graph
 	function remove_e_route($state, $debug = 0)
 	{	
 		self::$debug++;
-		//p("ITERATION: ".self::$debug."; STATE: ".$state->id);
-		//p($this->__toString());
 		static $e_states = [];
 		if($debug > 7) die('too deep recursion(8). stop in state ID:'.$state->id);
 		if(!$state->has_outcome_e_route())
@@ -140,16 +145,11 @@ class Graph
 
 				$this->merge_outcome_routes($last_state, $state);
 
-				//p($state->id.': end e-route');
-				//p("RESULT:");
-				//p($this->__toString());
-
 				$e_states = [];
 				return true;
 			}
 			else
 			{
-				//p($state->id.': no e-route');
 				//не было найдено ни одной е-дуги
 				$e_states = [];
 				return false;
@@ -166,12 +166,14 @@ class Graph
 				{
 					//удаляем цикл
 					$should_merge = false;
+					$e_states[$state->id] = $state;
+					$dest = $route->dest;
 					foreach($e_states as $visited_state)
 					{
-						$should_merge = $visited_state->id == $state->id;
-						if($visited_state->id != $state->id && $should_merge)
+						$should_merge = $should_merge ? $should_merge : $visited_state->id == $dest->id;
+						if($should_merge)
 						{
-							$this->merge($state, $visited_state);
+							$this->merge($dest, $visited_state);
 						}
 					}
 					$e_states = [];
@@ -192,7 +194,6 @@ class Graph
 		$i = 0;
 		while($this->has_e_route())
 		{
-			//p($i);
 			if($i++ > 20) die();
 			$this->remove_dummy_routes();
 			$this->remove_dummy_states();
@@ -224,6 +225,9 @@ class Graph
 		{
 			if(!$state->is_start() && !$state->has_income_route())
 				$this->delete_state($state);
+
+			if(!$state->has_income_route() && !$state->has_outcome_route())
+				$this->delete_state($state);				
 		}
 	}
 
@@ -326,16 +330,17 @@ class Graph
 			$outcoming_routes = $merged_state->outcoming_routes;
 			foreach($outcoming_routes as $route)
 			{
-				$state->add_outcome_route($route);
-				$merged_state->delete_outcome_route($route);
+				$new_route = new Route(['src' => $state, 'terminal' => $route->terminal, 'dest' => $route->dest]);
+				$this->add_route($new_route);
 			}
 
-			$incoming_routes = $merget_state->incoming_routes;
+			$incoming_routes = $merged_state->incoming_routes;
 			foreach($incoming_routes as $route)
 			{
-				$state->add_income_route($route);
-				$merget_state->delete_income_route($route);
+				$new_route = new Route(['src' => $route->src, 'terminal' => $route->terminal, 'dest' => $state]);
+				$this->add_route($new_route);
 			}
+			$this->delete_state($merged_state);
 		}
 	}	
 

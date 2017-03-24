@@ -93,6 +93,11 @@ class State
 		return $this->incoming_routes;
 	}
 
+	function has_outcome_route()
+	{
+		return $this->outcoming_routes;
+	}
+
 	function has_self_route()
 	{
 		foreach($this->outcoming_routes as $route)
